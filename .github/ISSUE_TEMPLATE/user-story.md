@@ -2,7 +2,7 @@
 name: User Story
 about: Create user stories to add to the backlog
 title: ''
-labels: ''
+labels: backlog
 assignees: FrostByte0x
 
 ---
