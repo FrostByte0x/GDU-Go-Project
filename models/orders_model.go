@@ -25,5 +25,5 @@ type Order struct {
 	State     OrderState `gorm:"type:enum('Created','Validated','Ready', 'Delivered');not null;index"`
 	// Foreign Keys
 	Products []OrderProduct `gorm:"foreignKey:OrderID"`
-	Menus    []Menu         `gorm:"foreignKey:OrderID"`
+	Menus    []OrderMenu    `gorm:"foreignKey:OrderID"`
 }
