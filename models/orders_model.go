@@ -23,4 +23,7 @@ type Order struct {
 	DeletedAt gorm.DeletedAt
 	Price     float64    `gorm:"type:decimal(10,2);not null"`
 	State     OrderState `gorm:"type:enum('Created','Validated','Ready', 'Delivered');not null;index"`
+	// Foreign Keys
+	Products []OrderProduct `gorm:"foreignKey:OrderID"`
+	Menus    []Menu         `gorm:"foreignKey:OrderID"`
 }

@@ -16,4 +16,6 @@ type Menu struct {
 	DeletedAt gorm.DeletedAt `gorm:"index"`                         // Allow soft delete and requests such as WHERE deleted_at IS NULL
 	Name      string         `json:"name" gorm:"size:32; not null"` // size:32 will use varchar(32) instead of LONGTEXT
 	Price     float64        `gorm:"type:decimal(10,2); not null"`  // maximum 99999999.99
+	// Foreign Keys
+	Products []MenuProduct `gorm:"foreignKey:OrderID"`
 }
