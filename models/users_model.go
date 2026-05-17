@@ -25,9 +25,9 @@ type User struct {
 	CreatedAt time.Time
 	DeletedAt gorm.DeletedAt
 	UpdatedAt time.Time
-	Username  string `gorm:"size:32"`
-	Password  string `gorm:"size:255"`
-	Role      Role   `gorm:"type:enum('administrator','preparator','reception')"`
+	Username  string `gorm:"size:32" json:"username"`
+	Password  string `gorm:"size:255" json:"password"`
+	Role      Role   `gorm:"type:enum('administrator','preparator','reception')" json:"role"`
 }
 
 // Testing Gorm hooks

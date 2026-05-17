@@ -19,8 +19,8 @@ type Product struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt
-	Name      string   `gorm:"size:64;not null"`
-	UnitPrice float64  `gorm:"type:decimal(10,2);not null"`
-	Type      Category `gorm:"type:enum('Boisson','Burger','Accompagnement');not null"`
-	Available bool     `gorm:"not null;default:true"`
+	Name      string   `gorm:"size:64;not null" json:"name"`
+	UnitPrice float64  `gorm:"type:decimal(10,2);not null" json:"price"`
+	Type      Category `gorm:"type:enum('Boisson','Burger','Accompagnement');not null" json:"type"`
+	Available bool     `gorm:"not null;default:true" json:"available"`
 }

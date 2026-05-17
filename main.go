@@ -6,23 +6,46 @@ import (
 	"os"
 	"wacdo-backend/config"
 	"wacdo-backend/models"
+	"wacdo-backend/routes"
 
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
 
 func main() {
+	// load .env variables using go dot env
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
 	// InitDB handles errors itself, not in main. Need to ensure it's the right design?
+	// I don't want to overload the main func
 	db := config.InitDB()
+	if db == nil {
+		slog.Error("Unable to instance DB object")
+		os.Exit(1)
+	}
 	slog.Info("Successfully connected to", "database", os.Getenv("DB_NAME"))
-	err = db.AutoMigrate(models.Menu{}, models.MenuProduct{}, models.OrderMenu{}, models.Order{}, models.User{}, models.Product{})
+	err = db.AutoMigrate(models.Menu{},
+		models.MenuProduct{},
+		models.OrderMenu{},
+		models.Order{},
+		models.User{},
+		models.Product{},
+		models.OrderProduct{},
+	)
+
 	if err != nil {
 		slog.Error(err.Error())
 		os.Exit(1)
 	}
 	slog.Info("Database setup is complete.")
-
+	// Register gin components
+	router := gin.Default()
+	// Trust no proxy
+	router.SetTrustedProxies(nil)
+	// Register the routes
+	routes.RegisterProductRoutes(db, router)
+	// Start the web server
+	router.Run(":8080")
 }

@@ -97,7 +97,9 @@ Trois rôles distincts sont à implémenter :
 - [ ] Les données sensibles et réglementées bénéficient d'un traitement spécifique et sont protégées
 - [ ] L'application informe l'utilisateur du stockage, de l'utilisation et du cadre de partage de ses données personnelles
 - [ ] L'utilisateur dispose d'un droit de consultation, modification et de suppression de ses données personnelles
-
+<!-- https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts -->
+> [!NOTE]
+> Cette application n'utilise pas de données personnelles . Les mots de passe sont stockées chiffrés en base de données.
 ### Conception fonctionnelle
 - [ ] Toutes les fonctionnalités nécessaires au bon fonctionnement de l'application sont correctement listées et détaillées
 - [ ] Le schéma fonctionnel décrit en détail l'enchaînement des vues en fonction des différentes actions et interactions
