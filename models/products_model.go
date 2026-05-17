@@ -24,3 +24,12 @@ type Product struct {
 	Type      Category `gorm:"type:enum('Boisson','Burger','Accompagnement');not null" json:"type"`
 	Available bool     `gorm:"not null;default:true" json:"available"`
 }
+
+// ReturnProduct is the product returned by the GET products API
+type ReturnProduct struct {
+	ID        int     `json:"ID"`
+	Name      string  `json:"name"`
+	UnitPrice float64 `json:"price"`
+	Type      string  `json:"type"`
+	Available bool    `json:"available"`
+}

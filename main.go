@@ -28,8 +28,8 @@ func main() {
 	slog.Info("Successfully connected to", "database", os.Getenv("DB_NAME"))
 	err = db.AutoMigrate(models.Menu{},
 		models.MenuProduct{},
-		models.OrderMenu{},
 		models.Order{},
+		models.OrderMenu{},
 		models.User{},
 		models.Product{},
 		models.OrderProduct{},
