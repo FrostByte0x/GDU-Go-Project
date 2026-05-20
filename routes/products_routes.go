@@ -14,6 +14,9 @@ func RegisterProductRoutes(db *gorm.DB, router *gin.Engine) {
 
 	{
 		productRoutes.POST("", controllers.CreateProductHandler(db))
+		productRoutes.GET("/:id", controllers.GetProductHandler(db))
 		productRoutes.GET("", controllers.GetProductsHandler(db))
+		productRoutes.PUT("/:id", controllers.UpdateProductHandler(db))
+		productRoutes.DELETE("/:id", controllers.DeleteProductHandler(db))
 	}
 }

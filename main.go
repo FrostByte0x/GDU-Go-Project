@@ -18,8 +18,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-	// InitDB handles errors itself, not in main. Need to ensure it's the right design?
-	// I don't want to overload the main func
+	// InitDB handles errors itself, not in main.
 	db := config.InitDB()
 	if db == nil {
 		slog.Error("Unable to instance DB object")
