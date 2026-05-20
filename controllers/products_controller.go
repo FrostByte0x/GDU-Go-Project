@@ -14,8 +14,7 @@ import (
 
 // Database operation to create a product
 func CreateProduct(db *gorm.DB, product *models.Product) error {
-	result := db.Create(product)
-	return result.Error
+	return db.Create(product).Error
 }
 
 // http handler to receive create product
@@ -35,14 +34,12 @@ func CreateProductHandler(db *gorm.DB) gin.HandlerFunc {
 }
 
 // Get products from the backend
-func GetProducts(db *gorm.DB) (*[]models.Product, error) {
+func GetProducts(db *gorm.DB) ([]models.Product, error) {
 	var products []models.Product
-	result := db.Find(&products)
-	if result.Error != nil {
-		return nil, result.Error
+	if err := db.Find(&products).Error; err != nil {
+		return nil, err
 	}
-	return &products, nil
-
+	return products, nil
 }
 
 // return the products to the caller
