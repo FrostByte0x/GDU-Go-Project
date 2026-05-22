@@ -45,6 +45,7 @@ func main() {
 	router.SetTrustedProxies(nil)
 	// Register the routes
 	routes.RegisterProductRoutes(db, router)
+	routes.RegisterMenuRoutes(db, router)
 	// Start the web server
 	router.Run(":8080")
 }

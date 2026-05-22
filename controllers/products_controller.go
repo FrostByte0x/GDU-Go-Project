@@ -3,7 +3,6 @@ package controllers
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"net/http"
 	"strconv"
 	"wacdo-backend/models"
@@ -93,19 +92,13 @@ func GetProductHandler(db *gorm.DB) gin.HandlerFunc {
 }
 
 // Delete Products
-func DeleteProduct(db *gorm.DB, id int) (*models.Product, error) {
-	var product models.Product
-	err := db.First(&product, id).Error
+func DeleteProduct(db *gorm.DB, id int) error {
+	var product *models.Product
+	product, err := GetProductByID(db, id)
 	if err != nil {
-		slog.Error(err.Error())
-		return nil, err
+		return err
 	}
-	err = db.Delete(&product).Error
-	if err != nil {
-		return nil, err
-	}
-	return &product, nil
-
+	return db.Delete(&product).Error
 }
 
 // Delete product http handler
@@ -117,7 +110,7 @@ func DeleteProductHandler(db *gorm.DB) gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid ID"})
 			return
 		}
-		product, err := DeleteProduct(db, id)
+		err = DeleteProduct(db, id)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				c.JSON(http.StatusNotFound, gin.H{"error": fmt.Sprintf("product with ID %d not found.", id)})
@@ -127,7 +120,7 @@ func DeleteProductHandler(db *gorm.DB) gin.HandlerFunc {
 				return
 			}
 		}
-		c.JSON(http.StatusOK, &product)
+		c.Status(http.StatusNoContent)
 	}
 }
 
