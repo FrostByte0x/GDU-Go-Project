@@ -1,8 +1,9 @@
 module wacdo-backend
 
-go 1.26.1
+go 1.26.3
 
 require (
+	github.com/esrid/watcher v0.1.8
 	github.com/gin-gonic/gin v1.12.0
 	github.com/glebarez/sqlite v1.11.0
 	github.com/google/uuid v1.6.0

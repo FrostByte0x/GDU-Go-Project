@@ -47,5 +47,6 @@ func main() {
 	routes.RegisterProductRoutes(db, router)
 	routes.RegisterMenuRoutes(db, router)
 	// Start the web server
+	slog.Info("Server started, listening on port 8080")
 	router.Run(":8080")
 }
