@@ -5,7 +5,7 @@ type OrderProduct struct {
 	ID        uint    `gorm:"primaryKey"`
 	OrderID   uint    `gorm:"index"`
 	ProductID uint    `gorm:"index"`
-	Quantity  int     `gorm:"not null"`
+	Quantity  uint    `gorm:"not null"`
 	Name      string  `gorm:"size:32"`
 	UnitPrice float64 `gorm:"type:decimal(10,2);not null"`
 }

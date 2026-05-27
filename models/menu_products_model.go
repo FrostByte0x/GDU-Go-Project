@@ -3,7 +3,7 @@ package models
 // MenuProduct is the products in a given Menu
 type MenuProduct struct {
 	ID        uint   `gorm:"primaryKey"`
-	MenuID    uint   `gorm:"not null;index;constraint:OnDelete:CASCADE"`
+	MenuID    uint   `gorm:"not null;index"`
 	ProductID uint   `gorm:"not null" json:"product_id"`
 	Quantity  int    `gorm:"not null"`
 	Name      string `gorm:"size:64;not null"`

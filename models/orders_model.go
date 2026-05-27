@@ -21,9 +21,9 @@ type Order struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt
-	Price     float64    `gorm:"type:decimal(10,2);not null"`
-	State     OrderState `gorm:"type:enum('Created','Validated','Ready', 'Delivered');not null;index"`
+	Price     float64    `gorm:"type:decimal(10,2);not null" json:"unit_price"`
+	State     OrderState `gorm:"type:enum('Created','Validated','Ready', 'Delivered');not null;index; default:'Created'"`
 	// Foreign Keys
-	Products []OrderProduct `gorm:"foreignKey:OrderID"`
-	Menus    []OrderMenu    `gorm:"foreignKey:OrderID"`
+	Products []OrderProduct `gorm:"foreignKey:OrderID;constraint:OnDelete:CASCADE"`
+	Menus    []OrderMenu    `gorm:"foreignKey:OrderID;constraint:OnDelete:CASCADE"`
 }

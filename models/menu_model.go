@@ -17,7 +17,7 @@ type Menu struct {
 	Name      string         `json:"name" gorm:"size:32; not null"`             // size:32 will use varchar(32) instead of LONGTEXT
 	Price     float64        `gorm:"type:decimal(10,2); not null" json:"price"` // maximum 99999999.99
 	// Foreign Keys
-	Products []MenuProduct `gorm:"foreignKey:MenuID"`
+	Products []MenuProduct `gorm:"foreignKey:MenuID;constraint:OnDelete:CASCADE"`
 }
 
 type UpdateMenu struct {
