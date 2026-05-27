@@ -12,3 +12,17 @@ services:
     volumes:
       - ./.data/mysql:/var/lib/mysql
       - ./init:/docker-entrypoint-initdb.d
+# Testing DB so we don't need SQLite to run tests
+  mariadb_test:
+    image: mariadb:11
+    container_name: mariadb_tests
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: myuser
+      MYSQL_PASSWORD: mypassword
+    ports:
+      - "3308:3306"
+    volumes:
+      - ./.data_test/mysql:/var/lib/mysql
+      - ./init:/docker-entrypoint-initdb.d
