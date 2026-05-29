@@ -19,6 +19,6 @@ type MenuProductResponse struct {
 type MenuResponse struct {
 	ID       uint                  `json:"id"`
 	Name     string                `json:"name"`
-	Price    uint                  `json:"price"`
+	Price    uint                  `json:"unit_price"`
 	Products []MenuProductResponse `json:"products"`
 }

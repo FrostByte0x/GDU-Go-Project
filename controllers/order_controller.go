@@ -70,9 +70,9 @@ func CreateOrderHandler(db *gorm.DB) gin.HandlerFunc {
 		order, err := CreateOrder(db, &inputOrder)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
 		}
 		c.JSON(http.StatusCreated, order)
-
 	}
 }
 
@@ -165,6 +165,7 @@ func GetOrderHandler(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
+// UpdateOrderState will update the state of a an Order to the models.OrderState
 func UpdateOrderState(db *gorm.DB, id int, state models.OrderState) error {
 	var order models.Order
 	update := make(map[string]models.OrderState)
@@ -173,10 +174,10 @@ func UpdateOrderState(db *gorm.DB, id int, state models.OrderState) error {
 		return err
 	}
 	return db.Model(&order).Updates(update).Error
-
 }
 
-func UpdateOrderHandler(db *gorm.DB) gin.HandlerFunc {
+// UpdateOrderStateHandler is the http handler that will receive http/put requests to update the status of an order.
+func UpdateOrderStateHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		idParam := c.Param("id")
 		id, err := strconv.Atoi(idParam)

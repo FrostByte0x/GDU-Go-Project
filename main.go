@@ -14,7 +14,7 @@ import (
 
 func main() {
 	// load .env variables using go dot env
-	err := godotenv.Load()
+	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
@@ -46,6 +46,8 @@ func main() {
 	// Register the routes
 	routes.RegisterProductRoutes(db, router)
 	routes.RegisterMenuRoutes(db, router)
+	routes.RegisterWatcher(db, router)
+	routes.RegisterOrderRoutes(db, router)
 	// Start the web server
 	slog.Info("Server started, listening on port 8080")
 	router.Run(":8080")

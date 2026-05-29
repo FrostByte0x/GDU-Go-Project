@@ -14,6 +14,6 @@ func RegisterOrderRoutes(db *gorm.DB, router *gin.Engine) {
 		routes.DELETE("/:id", controllers.DeleteOrderHandler(db))
 		routes.GET("", controllers.GetOrdersHandler(db))
 		routes.GET("/:id", controllers.GetOrderHandler(db))
-		routes.PUT("/:id", controllers.UpdateOrderHandler(db))
+		routes.PUT("/:id", controllers.UpdateOrderStateHandler(db))
 	}
 }
