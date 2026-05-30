@@ -10,6 +10,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var testDB *gorm.DB
@@ -21,7 +22,9 @@ func TestMain(m *testing.M) {
 		log.Fatal("Error loading .env.test file")
 	}
 	// InitDB handles errors itself, not in main.
-	testDB = config.InitDB()
+	testDB = config.InitDB().Session(&gorm.Session{
+		Logger: logger.Default.LogMode(logger.Silent),
+	})
 	if testDB == nil {
 		slog.Error("Unable to instance DB object")
 		os.Exit(1)

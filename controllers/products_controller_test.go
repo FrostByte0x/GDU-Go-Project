@@ -54,6 +54,7 @@ func TestUpdateProduct(t *testing.T) {
 	td.Cmp(t, updatedProduct.Name, td.Not("Burger"))
 }
 
+// Includes test for fake IDs
 func TestGetProduct(t *testing.T) {
 	product := createTestProduct(t)
 	// Ensure the ID is updated at creation
@@ -66,4 +67,10 @@ func TestGetProduct(t *testing.T) {
 	td.Cmp(t, TestProduct.ID, td.NotZero())
 	// Ensure the bool worked
 	td.CmpTrue(t, TestProduct.Available)
+	// Test fake ID
+	_, err = controllers.GetProductByID(testDB, 9999)
+	td.CmpError(t, err)
+	// Test invalid ID
+	_, err = controllers.GetProductByID(testDB, -4)
+	td.CmpError(t, err)
 }
