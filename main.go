@@ -50,5 +50,7 @@ func main() {
 	routes.RegisterOrderRoutes(db, router)
 	// Start the web server
 	slog.Info("Server started, listening on port 8080")
-	router.Run(":8080")
+	if err := router.Run(":8080"); err != nil {
+		log.Fatal(err)
+	}
 }

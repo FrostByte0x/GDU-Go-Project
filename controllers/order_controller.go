@@ -3,6 +3,7 @@ package controllers
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"wacdo-backend/models"
@@ -116,8 +117,16 @@ func DeleteOrderHandler(db *gorm.DB) gin.HandlerFunc {
 }
 
 // GetOrders will load orders from the database
-func GetOrders(db *gorm.DB) ([]models.Order, error) {
+func GetOrders(db *gorm.DB, state *models.OrderState) ([]models.Order, error) {
 	var orders []models.Order
+	if state != nil {
+		slog.Info("Handling request for Orders with", "state", *state)
+		if err := db.Preload("Products").Preload("Menus").Where("state = ?", *state).Find(&orders).Error; err != nil {
+			return orders, err
+		}
+		return orders, nil
+	}
+	// No state requested, return all orders
 	if err := db.Preload("Products").Preload("Menus").Find(&orders).Error; err != nil {
 		return orders, err
 	}
@@ -127,7 +136,16 @@ func GetOrders(db *gorm.DB) ([]models.Order, error) {
 // GetOrdersHandler handles http requests to get orders
 func GetOrdersHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		orders, err := GetOrders(db)
+		var statefilter *models.OrderState
+		stateRequest := models.OrderState(c.Query("state"))
+		if stateRequest != "" {
+			statefilter = &stateRequest
+		}
+		if !stateRequest.IsValid() && stateRequest != "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid state search query"})
+			return
+		}
+		orders, err := GetOrders(db, statefilter)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -139,7 +157,7 @@ func GetOrdersHandler(db *gorm.DB) gin.HandlerFunc {
 // GetOrder will return a single order by its ID
 func GetOrder(db *gorm.DB, id int) (*models.Order, error) {
 	var order models.Order
-	err := db.First(&order, id).Error
+	err := db.Preload("Products").Preload("Menus").First(&order, id).Error
 	return &order, err
 }
 
@@ -166,14 +184,14 @@ func GetOrderHandler(db *gorm.DB) gin.HandlerFunc {
 }
 
 // UpdateOrderState will update the state of a an Order to the models.OrderState
-func UpdateOrderState(db *gorm.DB, id int, state models.OrderState) error {
+func UpdateOrderState(db *gorm.DB, id int, state models.OrderState) (models.Order, error) {
 	var order models.Order
-	update := make(map[string]models.OrderState)
+	update := make(map[string]any)
 	update["state"] = state
-	if err := db.First(&order, id).Error; err != nil {
-		return err
+	if err := db.Preload("Menus").Preload("Products").First(&order, id).Error; err != nil {
+		return order, err
 	}
-	return db.Model(&order).Updates(update).Error
+	return order, db.Model(&order).Updates(update).Error
 }
 
 // UpdateOrderStateHandler is the http handler that will receive http/put requests to update the status of an order.
@@ -190,7 +208,12 @@ func UpdateOrderStateHandler(db *gorm.DB) gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
 			return
 		}
-		if err := UpdateOrderState(db, id, StateUpdate.State); err != nil {
+		if !StateUpdate.State.IsValid() {
+			c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("invalid state: %s", StateUpdate.State)})
+			return
+		}
+		var order models.Order
+		if order, err = UpdateOrderState(db, id, StateUpdate.State); err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				c.JSON(http.StatusNotFound, gin.H{"error": fmt.Sprintf("Order with ID %d not found", id)})
 				return
@@ -198,6 +221,6 @@ func UpdateOrderStateHandler(db *gorm.DB) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		c.Status(http.StatusNoContent)
+		c.JSON(http.StatusAccepted, order)
 	}
 }

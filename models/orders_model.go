@@ -51,3 +51,11 @@ type OrderUpdate struct {
 type StateOrderUpdate struct {
 	State OrderState `json:"state" binding:"required"`
 }
+
+func (state OrderState) IsValid() bool {
+	switch state {
+	case Created, Validated, Ready, Delivered:
+		return true
+	}
+	return false
+}
