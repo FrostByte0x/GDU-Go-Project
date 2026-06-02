@@ -20,7 +20,7 @@ func Authorize(roles []models.Role) gin.HandlerFunc {
 		// type assertion to ensure the interface is correct
 		claimedRole, ok := claimedRoleString.(models.Role)
 		// If the role is allowed, OR if the role is administrator, which has all permissions.
-		if !slices.Contains(roles, claimedRole) || claimedRole == models.Administrator {
+		if slices.Contains(roles, claimedRole) || claimedRole == models.Administrator {
 			c.Next()
 			return
 		}
