@@ -45,6 +45,7 @@ func main() {
 	router.SetTrustedProxies(nil)
 	// Register the routes
 	routes.RegisterProductRoutes(db, router)
+	routes.RegisterUserRoutes(db, router)
 	routes.RegisterMenuRoutes(db, router)
 	routes.RegisterWatcher(db, router)
 	routes.RegisterOrderRoutes(db, router)

@@ -11,6 +11,8 @@ import (
 // Create a go-compatible enum for the roles of the restaurant
 //
 // Roles are checked by the Authorization Middleware
+
+// Can be null on Gorm
 type Role string
 
 const (
@@ -27,7 +29,14 @@ type User struct {
 	UpdatedAt time.Time
 	Username  string `gorm:"size:32" json:"username"`
 	Password  string `gorm:"size:255" json:"password"`
-	Role      Role   `gorm:"type:enum('administrator','preparator','reception')" json:"role"`
+	Role      *Role  `gorm:"type:enum('administrator','preparator','reception')" json:"role"` // nullable by using a pointer
+}
+type UserForm struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+type UserRoleUpdateForm struct {
+	Role *Role `json:"role"`
 }
 
 // Testing Gorm hooks
@@ -55,6 +64,14 @@ type UserReturn struct {
 	ID        uuid.UUID `json:"user_id"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
-	Username  string    `gorm:"size:32"`
+	Username  string    `gorm:"size:32" json:"username"`
 	Role      Role      `json:"role"`
+}
+
+func (r Role) IsValid() bool {
+	switch r {
+	case Administrator, Preparator, Reception:
+		return true
+	}
+	return false
 }

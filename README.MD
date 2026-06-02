@@ -130,6 +130,6 @@ Trois rôles distincts sont à implémenter :
 - [ ] L'application est testée en production sans erreurs ni effets de bord
 
 # Limite / Pour aller plus loin
-* L'index d'un Enum de 4 string ne présente pas de cardinalité et ne sera pas toujours pertinent.
 * Les sessions invités / customer ne sont pas implémentées : un client ne peut pas s'enregistrer, et voir ses commandes passées, il n'y a pas de Guest Session (qui pourraient par exemple passer une commande aux bornes)
 * Les modèles de ressources pourraient faire de l'embedding pour ne pas répéter les mêmes déclarations
+* La gestion d'utilisateurs est "sécurisée" en autorisant l'accès uniquement depuis localhost à défaut de pouvoir implémenter un système d'IAM complet. 
