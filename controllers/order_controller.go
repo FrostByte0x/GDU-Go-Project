@@ -3,9 +3,9 @@ package controllers
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"net/http"
 	"strconv"
+	"strings"
 	"wacdo-backend/models"
 
 	"github.com/gin-gonic/gin"
@@ -120,35 +120,41 @@ func DeleteOrderHandler(db *gorm.DB) gin.HandlerFunc {
 }
 
 // GetOrders will load orders from the database
-func GetOrders(db *gorm.DB, state *models.OrderState) ([]models.Order, error) {
+func GetOrders(db *gorm.DB, filters models.OrderFilter) ([]models.Order, error) {
 	var orders []models.Order
-	if state != nil {
-		slog.Info("Handling request for Orders with", "state", *state)
-		if err := db.Preload("Products").Preload("Menus").Where("state = ?", *state).Find(&orders).Error; err != nil {
-			return orders, err
-		}
-		return orders, nil
+	query := db.Preload("Products").Preload("Menus")
+	if filters.State != nil {
+		query = query.Where("state = ?", filters.State)
 	}
-	// No state requested, return all orders
-	if err := db.Preload("Products").Preload("Menus").Find(&orders).Error; err != nil {
-		return orders, err
+	if filters.Sort != "" {
+		query = query.Order(fmt.Sprintf("created_at %s", strings.ToUpper(filters.Sort)))
 	}
-	return orders, nil
+	return orders, query.Find(&orders).Error
 }
 
 // GetOrdersHandler handles http requests to get orders
 func GetOrdersHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var statefilter *models.OrderState
+		// Initite a filter for orders
+		var filters models.OrderFilter
+		// Handle state filtering
 		stateRequest := models.OrderState(c.Query("state"))
-		if stateRequest != "" {
-			statefilter = &stateRequest
-		}
 		if !stateRequest.IsValid() && stateRequest != "" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid state search query"})
 			return
 		}
-		orders, err := GetOrders(db, statefilter)
+		if stateRequest != "" {
+			filters.State = &stateRequest
+		}
+		// handle sort
+		if sort := c.Query("sort"); sort != "" {
+			if sort != "asc" && sort != "desc" {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "sort must be asc or desc"})
+				return
+			}
+			filters.Sort = sort
+		}
+		orders, err := GetOrders(db, filters)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return

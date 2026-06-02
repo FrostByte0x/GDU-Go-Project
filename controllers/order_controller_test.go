@@ -182,7 +182,7 @@ func TestGetOrders(t *testing.T) {
 	t.Run("returns all orders when no filter", func(t *testing.T) {
 		createTestOrder(t)
 		createTestOrder(t)
-		orders, err := controllers.GetOrders(testDB, nil)
+		orders, err := controllers.GetOrders(testDB, models.OrderFilter{})
 		td.CmpNoError(t, err)
 		td.Cmp(t, len(orders), td.Gte(2))
 	})
@@ -190,7 +190,7 @@ func TestGetOrders(t *testing.T) {
 	t.Run("filters by Created state", func(t *testing.T) {
 		createTestOrder(t)
 		state := models.Created
-		orders, err := controllers.GetOrders(testDB, &state)
+		orders, err := controllers.GetOrders(testDB, models.OrderFilter{State: &state})
 		td.CmpNoError(t, err)
 		for _, o := range orders {
 			td.Cmp(t, o.State, models.Created)
@@ -202,7 +202,7 @@ func TestGetOrders(t *testing.T) {
 		_, err := controllers.UpdateOrderState(testDB, int(order.ID), models.Validated)
 		td.CmpNoError(t, err)
 		state := models.Validated
-		orders, err := controllers.GetOrders(testDB, &state)
+		orders, err := controllers.GetOrders(testDB, models.OrderFilter{State: &state})
 		td.CmpNoError(t, err)
 		td.Cmp(t, len(orders), td.Gte(1))
 		for _, o := range orders {
@@ -212,7 +212,7 @@ func TestGetOrders(t *testing.T) {
 
 	t.Run("preloads products and menus", func(t *testing.T) {
 		createTestOrder(t)
-		orders, err := controllers.GetOrders(testDB, nil)
+		orders, err := controllers.GetOrders(testDB, models.OrderFilter{})
 		td.CmpNoError(t, err)
 		td.Cmp(t, len(orders), td.Gte(1))
 		// The first order with products should have them preloaded
