@@ -2,6 +2,7 @@ package routes
 
 import (
 	"wacdo-backend/controllers"
+	"wacdo-backend/middlewares"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -9,7 +10,7 @@ import (
 
 func RegisterUserRoutes(db *gorm.DB, router *gin.Engine) {
 	UserRoutes := router.Group("/users")
-	// UserRoutes.Use(middlewares.LocalHostOnly()) .Use on User management routes
+	UserRoutes.Use(middlewares.LocalHostOnly())
 
 	{
 		UserRoutes.POST("/register", controllers.Register(db))

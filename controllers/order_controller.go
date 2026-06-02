@@ -38,6 +38,10 @@ func CreateOrder(db *gorm.DB, inputOrder *models.OrderInput) (*models.Order, err
 		if err != nil {
 			return nil, err
 		}
+		// Ensure product is available when added to the order
+		if !product.Available {
+			return nil, fmt.Errorf("Product %s is currently unavailable.", product.Name)
+		}
 		order.Products[k].Name = product.Name
 		order.Products[k].UnitPrice = product.UnitPrice
 		sumOfPrice += order.Products[k].UnitPrice * float64(order.Products[k].Quantity)
@@ -47,6 +51,10 @@ func CreateOrder(db *gorm.DB, inputOrder *models.OrderInput) (*models.Order, err
 		menu, err := GetMenu(db, int(v.MenuID))
 		if err != nil {
 			return nil, err
+		}
+		// Ensure menu is available when added to the order
+		if !menu.Available {
+			return nil, fmt.Errorf("Menu %s is currently unavailable.", menu.Name)
 		}
 		order.Menus[k].Name = menu.Name
 		order.Menus[k].UnitPrice = menu.Price
@@ -97,11 +105,6 @@ func DeleteOrder(db *gorm.DB, id int) error {
 // DeleteOrderHandler will handle requests
 func DeleteOrderHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Ensure the user has the administrator role
-		// if c.GetString("role") != "administrator" {
-		// 	c.JSON(http.StatusForbidden, gin.H{"error": "Operation is not allowed"})
-		// 	return
-		// }
 		idParam := c.Param("id")
 		id, err := strconv.Atoi(idParam)
 		if err != nil {

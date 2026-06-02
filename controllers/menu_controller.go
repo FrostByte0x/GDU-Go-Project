@@ -159,6 +159,9 @@ func UpdateMenuHandler(db *gorm.DB) gin.HandlerFunc {
 		if updateMenu.Products != nil {
 			update["products"] = *updateMenu.Products
 		}
+		if updateMenu.Available != nil {
+			update["available"] = *updateMenu.Available
+		}
 		if len(update) == 0 {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "empty update payload"})
 			return

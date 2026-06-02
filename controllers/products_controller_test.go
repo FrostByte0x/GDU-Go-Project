@@ -20,6 +20,17 @@ func createTestProduct(t *testing.T) models.Product {
 	td.CmpNoError(t, controllers.CreateProduct(testDB, &TestProduct))
 	return TestProduct
 }
+func createTestUnavailableProduct(t *testing.T) models.Product {
+	t.Helper()
+	TestProduct := models.Product{
+		Name:      "Boisson non disponible",
+		UnitPrice: 3.25,
+		Type:      models.Boisson,
+		Available: false,
+	}
+	td.CmpNoError(t, controllers.CreateProduct(testDB, &TestProduct))
+	return TestProduct
+}
 func TestCreateProduct(t *testing.T) {
 	TestProduct := models.Product{
 		Name:      "Burger",

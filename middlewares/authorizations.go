@@ -19,10 +19,12 @@ func Authorize(roles []models.Role) gin.HandlerFunc {
 		}
 		// type assertion to ensure the interface is correct
 		claimedRole, ok := claimedRoleString.(models.Role)
-		if !slices.Contains(roles, claimedRole) {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": fmt.Sprintf("%s is not allowed to access this content", string(claimedRole))})
+		// If the role is allowed, OR if the role is administrator, which has all permissions.
+		if !slices.Contains(roles, claimedRole) || claimedRole == models.Administrator {
+			c.Next()
 			return
 		}
-		c.Next()
+		// If not, we deny the request
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": fmt.Sprintf("%s is not allowed to access this content", string(claimedRole))})
 	}
 }

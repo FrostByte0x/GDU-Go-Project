@@ -92,6 +92,19 @@ func TestCreateOrder(t *testing.T) {
 		td.Cmp(t, order.Price, product.UnitPrice+menu.Price)
 	})
 
+	t.Run("with unavailable product", func(t *testing.T) {
+		unavailableProduct := createTestUnavailableProduct(t)
+		input := models.OrderInput{
+			Products: []models.OrderProduct{
+				{ProductID: uint(unavailableProduct.ID), Quantity: 1},
+			},
+			Menus: []models.OrderMenu{},
+		}
+		order, err := controllers.CreateOrder(testDB, &input)
+		td.CmpNil(t, order)
+		td.CmpError(t, err)
+	})
+
 	t.Run("empty order is rejected", func(t *testing.T) {
 		input := models.OrderInput{
 			Products: []models.OrderProduct{},

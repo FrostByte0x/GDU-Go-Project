@@ -16,9 +16,9 @@ import (
 type Role string
 
 const (
-	Administrator Role = "administrator"
-	Preparator    Role = "preparator"
-	Reception     Role = "reception"
+	Administrator Role = "administrator" // gestion des données et des utilisateurs
+	Preparator    Role = "preparator"    //  peut voir les commandes et les valider
+	Reception     Role = "reception"     // peut saisir une commande (au comptoir ou prise par téléphone), et remettre une commande à un client.
 )
 
 // Users perform data operations on the resources of the restaurant
@@ -37,6 +37,15 @@ type UserForm struct {
 }
 type UserRoleUpdateForm struct {
 	Role *Role `json:"role"`
+}
+
+// Work in progress - struct to return to administrator when changing a user
+type UserReturn struct {
+	ID        uuid.UUID `json:"user_id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Username  string    `gorm:"size:32" json:"username"`
+	Role      Role      `json:"role"`
 }
 
 // Testing Gorm hooks
@@ -59,15 +68,7 @@ func (u *User) AfterCreate(tx *gorm.DB) error {
 	return nil
 }
 
-// Work in progress - struct to return to administrator when changing a user
-type UserReturn struct {
-	ID        uuid.UUID `json:"user_id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Username  string    `gorm:"size:32" json:"username"`
-	Role      Role      `json:"role"`
-}
-
+// IsValid will return a boolean to ensure a given Role is valid or not.
 func (r Role) IsValid() bool {
 	switch r {
 	case Administrator, Preparator, Reception:
