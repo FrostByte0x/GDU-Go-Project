@@ -154,6 +154,7 @@ func GetOrdersHandler(db *gorm.DB) gin.HandlerFunc {
 			}
 			filters.Sort = sort
 		}
+		// Execute the query
 		orders, err := GetOrders(db, filters)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

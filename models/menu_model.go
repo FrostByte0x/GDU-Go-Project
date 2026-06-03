@@ -18,7 +18,7 @@ type Menu struct {
 	Price     float64        `gorm:"type:decimal(10,2); not null" json:"unit_price"` // maximum 99999999.99
 	// Foreign Keys
 	Products  []MenuProduct `gorm:"foreignKey:MenuID;constraint:OnDelete:CASCADE"`
-	Available bool          `json:"available" gorm:"default:true;not null"`
+	Available bool          `json:"available" gorm:"not null"`
 }
 
 type UpdateMenu struct {
