@@ -17,6 +17,18 @@ func CreateProduct(db *gorm.DB, product *models.Product) error {
 }
 
 // http handler to receive create product
+//
+//	@tags			products
+//	@summary		Create a product
+//	@accept			json
+//	@produce		json
+//	@security		BearerAuth
+//	@description	Create a product
+//	@param			product	body		models.ReturnProduct	true	"Product payload"
+//	@success		201		{object}	models.ReturnProduct
+//	@failure		400		{object}	models.ErrorResponse	"Invalid request payload received"
+//	@failure		500		{object}	models.ErrorResponse	"Internal error creating the product"
+//	@router			/products [post]
 func CreateProductHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var product models.Product
@@ -41,7 +53,14 @@ func GetProducts(db *gorm.DB) ([]models.Product, error) {
 	return products, nil
 }
 
-// return the products to the caller
+// http handler to return the products to the caller
+//
+//	@tags		products
+//	@summary	Get all products
+//	@produce	json
+//	@success	200	{object}	[]models.ReturnProduct	"The list of products"
+//	@router		/products [get]
+//	@failure	500	{object}	models.ErrorResponse	"Error retrieving products"
 func GetProductsHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		products, err := GetProducts(db)
@@ -65,6 +84,14 @@ func GetProductByID(db *gorm.DB, id int) (*models.Product, error) {
 	return &product, nil
 }
 
+// http handler to get a product by its ID
+//
+//	@tags		products
+//	@summary	Get a single product by its ID
+//	@produce	json
+//	@param		ID	path		int						true	"Product ID"
+//	@success	200	{object}	models.ReturnProduct	"A product"
+//	@router		/products/{ID} [get]
 func GetProductHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		idParam := c.Param("id")
@@ -102,6 +129,16 @@ func DeleteProduct(db *gorm.DB, id int) error {
 }
 
 // Delete product http handler
+//
+//	@router		/products/{ID} [delete]
+//	@tags		products
+//	@summary	Delete a product
+//	@success	204
+//	@param		ID	path	int	true	"Product ID"
+//	@security	BearerAuth
+//	@failure	400	{object}	models.ErrorResponse	"Bad request"
+//	@failure	404	{object}	models.ErrorResponse	"Product does not exist"
+//	@failure	500	{object}	models.ErrorResponse	"Internal server error"
 func DeleteProductHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		idParam := c.Param("id")
@@ -127,7 +164,6 @@ func DeleteProductHandler(db *gorm.DB) gin.HandlerFunc {
 // Update Products
 // To update a product, we create an update struct for fields that are allowed to be updated by the client
 // such as the price or description of the product
-
 func UpdateProduct(db *gorm.DB, id int, update map[string]any) (*models.Product, error) {
 	var product models.Product
 	err := db.First(&product, id).Error
@@ -138,11 +174,25 @@ func UpdateProduct(db *gorm.DB, id int, update map[string]any) (*models.Product,
 		return nil, err
 	}
 	return &product, nil
-
 }
 
 // UpdateProductHandler returns the http func that handles requests to update a product, using
 // the UpdateProduct
+//
+//	@summary		Update a product
+//	@description	Update a product properties
+//	@param			ID		path	int						true	"Product ID"
+//	@param			update	body	models.UpdateProducts	true	"fields to update"
+//	@router			/products/{ID} [put]
+//	@security		BearerAuth
+//	@tags			products
+//	@param			ID	path		int						true	"Product ID"
+//	@success		200	{object}	models.ReturnProduct	"The updated product"
+//	@produce		json
+//	@failure		400	{object}	models.ErrorResponse	"Invalid request payload"
+//	@failure		404	{object}	models.ErrorResponse	"Product not found"
+//	@failure		500	{object}	models.ErrorResponse	"Error upading object"
+//	@accept			json
 func UpdateProductHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var inputUpdate models.UpdateProducts

@@ -1,0 +1,198 @@
+basePath: /
+definitions:
+  models.Category:
+    enum:
+    - Boisson
+    - Burger
+    - Accompagnement
+    type: string
+    x-enum-varnames:
+    - Boisson
+    - Burger
+    - Accompagnement
+  models.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  models.ReturnProduct:
+    properties:
+      ID:
+        type: integer
+      available:
+        type: boolean
+      name:
+        type: string
+      type:
+        type: string
+      unit_price:
+        type: number
+    type: object
+  models.UpdateProducts:
+    properties:
+      available:
+        type: boolean
+      name:
+        type: string
+      type:
+        $ref: '#/definitions/models.Category'
+      unit_price:
+        type: number
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: frostByte0x@github.com
+    name: frostByte0x
+    url: https://github.com/FrostByte0x/GDU-Go-Project
+  description: 'Le backend des commandes Wacdo gère pour chaque magasin: les commandes,
+    les produits, les menus.'
+  title: Wacdo Order System Backend
+  version: "1.0"
+paths:
+  /products:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The list of products
+          schema:
+            items:
+              $ref: '#/definitions/models.ReturnProduct'
+            type: array
+        "500":
+          description: Error retrieving products
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Get all products
+      tags:
+      - products
+    post:
+      consumes:
+      - application/json
+      description: Create a product
+      parameters:
+      - description: Product payload
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/models.ReturnProduct'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.ReturnProduct'
+        "400":
+          description: Invalid request payload received
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal error creating the product
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a product
+      tags:
+      - products
+  /products/{ID}:
+    delete:
+      parameters:
+      - description: Product ID
+        in: path
+        name: ID
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Product does not exist
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete a product
+      tags:
+      - products
+    get:
+      parameters:
+      - description: Product ID
+        in: path
+        name: ID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: A product
+          schema:
+            $ref: '#/definitions/models.ReturnProduct'
+      summary: Get a single product by its ID
+      tags:
+      - products
+    put:
+      consumes:
+      - application/json
+      description: Update a product properties
+      parameters:
+      - description: Product ID
+        in: path
+        name: ID
+        required: true
+        type: integer
+      - description: fields to update
+        in: body
+        name: update
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateProducts'
+      - description: Product ID
+        in: path
+        name: ID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The updated product
+          schema:
+            $ref: '#/definitions/models.ReturnProduct'
+        "400":
+          description: Invalid request payload
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Product not found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Error upading object
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update a product
+      tags:
+      - products
+securityDefinitions:
+  BearerAuth:
+    description: Use a bearer token to authenticate. Get a token at /users/login
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
