@@ -1,5 +1,13 @@
 basePath: /
 definitions:
+  gorm.DeletedAt:
+    properties:
+      time:
+        type: string
+      valid:
+        description: Valid is true if Time is not NULL
+        type: boolean
+    type: object
   models.Category:
     enum:
     - Boisson
@@ -15,6 +23,166 @@ definitions:
       error:
         type: string
     type: object
+  models.Menu:
+    properties:
+      available:
+        type: boolean
+      createdAt:
+        description: Gorm automatically handles these fields at create and update
+          time
+        type: string
+      deletedAt:
+        allOf:
+        - $ref: '#/definitions/gorm.DeletedAt'
+        description: Allow soft delete and requests such as WHERE deleted_at IS NULL
+      id:
+        type: integer
+      name:
+        description: size:32 will use varchar(32) instead of LONGTEXT
+        type: string
+      products:
+        description: Foreign Keys
+        items:
+          $ref: '#/definitions/models.MenuProduct'
+        type: array
+      unit_price:
+        description: maximum 99999999.99
+        type: number
+      updatedAt:
+        description: Gorm automatically handles these fields at create and update
+          time
+        type: string
+    type: object
+  models.MenuProduct:
+    properties:
+      id:
+        type: integer
+      menuID:
+        type: integer
+      name:
+        type: string
+      product_id:
+        type: integer
+      quantity:
+        type: integer
+    type: object
+  models.MenuProductResponse:
+    properties:
+      name:
+        type: string
+      quantity:
+        type: integer
+    type: object
+  models.MenuResponse:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      products:
+        items:
+          $ref: '#/definitions/models.MenuProductResponse'
+        type: array
+      unit_price:
+        type: integer
+    type: object
+  models.Order:
+    properties:
+      ID:
+        type: integer
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      menus:
+        items:
+          $ref: '#/definitions/models.OrderMenu'
+        type: array
+      products:
+        description: Foreign Keys
+        items:
+          $ref: '#/definitions/models.OrderProduct'
+        type: array
+      state:
+        $ref: '#/definitions/models.OrderState'
+      unit_price:
+        type: number
+      updatedAt:
+        type: string
+    required:
+    - menus
+    - products
+    type: object
+  models.OrderInput:
+    properties:
+      menus:
+        description: The array is required, even if empty
+        items:
+          $ref: '#/definitions/models.OrderMenu'
+        type: array
+      products:
+        description: The array is required, even if empty
+        items:
+          $ref: '#/definitions/models.OrderProduct'
+        type: array
+    required:
+    - menus
+    - products
+    type: object
+  models.OrderMenu:
+    properties:
+      ID:
+        type: integer
+      menu_id:
+        type: integer
+      name:
+        description: Must match Menu name constraints!
+        type: string
+      orderID:
+        type: integer
+      quantity:
+        type: integer
+      unit_price:
+        description: Price of the menu in the order
+        type: number
+    type: object
+  models.OrderProduct:
+    properties:
+      ID:
+        type: integer
+      name:
+        type: string
+      orderID:
+        type: integer
+      product_id:
+        type: integer
+      quantity:
+        type: integer
+      unit_price:
+        type: number
+    type: object
+  models.OrderState:
+    enum:
+    - Created
+    - Validated
+    - Ready
+    - Delivered
+    type: string
+    x-enum-comments:
+      Created: At creation, needs payment confirmation at Reception users
+      Delivered: The customer has picked the order, this is the final lifecycle step.
+      Ready: Order is ready to be delivered to the customer
+      Validated: After payment, will be prepared by Preparation users
+    x-enum-descriptions:
+    - At creation, needs payment confirmation at Reception users
+    - After payment, will be prepared by Preparation users
+    - Order is ready to be delivered to the customer
+    - The customer has picked the order, this is the final lifecycle step.
+    x-enum-varnames:
+    - Created
+    - Validated
+    - Ready
+    - Delivered
   models.ReturnProduct:
     properties:
       ID:
@@ -25,6 +193,51 @@ definitions:
         type: string
       type:
         type: string
+      unit_price:
+        type: number
+    type: object
+  models.Role:
+    enum:
+    - administrator
+    - preparator
+    - reception
+    type: string
+    x-enum-comments:
+      Administrator: gestion des données et des utilisateurs
+      Preparator: peut voir les commandes et les valider
+      Reception: peut saisir une commande (au comptoir ou prise par téléphone), et
+        remettre une commande à un client.
+    x-enum-descriptions:
+    - gestion des données et des utilisateurs
+    - peut voir les commandes et les valider
+    - peut saisir une commande (au comptoir ou prise par téléphone), et remettre une
+      commande à un client.
+    x-enum-varnames:
+    - Administrator
+    - Preparator
+    - Reception
+  models.StateOrderUpdate:
+    properties:
+      state:
+        $ref: '#/definitions/models.OrderState'
+    required:
+    - state
+    type: object
+  models.TokenResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  models.UpdateMenu:
+    properties:
+      available:
+        type: boolean
+      name:
+        type: string
+      products:
+        items:
+          $ref: '#/definitions/models.MenuProduct'
+        type: array
       unit_price:
         type: number
     type: object
@@ -39,6 +252,31 @@ definitions:
       unit_price:
         type: number
     type: object
+  models.UserForm:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  models.UserReturn:
+    properties:
+      created_at:
+        type: string
+      role:
+        $ref: '#/definitions/models.Role'
+      updated_at:
+        type: string
+      user_id:
+        type: string
+      username:
+        type: string
+    type: object
+  models.UserRoleUpdateForm:
+    properties:
+      role:
+        $ref: '#/definitions/models.Role'
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -50,6 +288,317 @@ info:
   title: Wacdo Order System Backend
   version: "1.0"
 paths:
+  /menus:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.MenuResponse'
+            type: array
+        "500":
+          description: Error loading menus
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Get all menus
+      tags:
+      - Menus
+    post:
+      consumes:
+      - application/json
+      description: Requires Administrator role.
+      parameters:
+      - description: Menu payload
+        in: body
+        name: menu
+        required: true
+        schema:
+          $ref: '#/definitions/models.Menu'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.MenuResponse'
+        "400":
+          description: Invalid menu payload
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Error creating menu
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a menu
+      tags:
+      - Menus
+  /menus/{ID}:
+    delete:
+      description: Requires Administrator role.
+      parameters:
+      - description: Menu ID
+        in: path
+        name: ID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid ID
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Menu not found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete a menu
+      tags:
+      - Menus
+    get:
+      parameters:
+      - description: Menu ID
+        in: path
+        name: ID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.MenuResponse'
+        "400":
+          description: Invalid ID
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Menu not found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Get a menu by its ID
+      tags:
+      - Menus
+    put:
+      consumes:
+      - application/json
+      description: Requires Administrator role.
+      parameters:
+      - description: Menu ID
+        in: path
+        name: ID
+        required: true
+        type: integer
+      - description: Fields to update
+        in: body
+        name: update
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateMenu'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.MenuResponse'
+        "400":
+          description: Invalid ID or payload
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Menu not found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Error updating menu
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update a menu
+      tags:
+      - Menus
+  /orders:
+    get:
+      parameters:
+      - description: 'Filter by state: Created, Validated, Ready, Delivered'
+        in: query
+        name: state
+        type: string
+      - description: 'Sort by creation date: asc or desc'
+        in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Order'
+            type: array
+        "400":
+          description: Invalid query parameters
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Error retrieving orders
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get all orders
+      tags:
+      - Orders
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Payload to create an order
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/models.OrderInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Order'
+        "400":
+          description: Invalid order payload
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Error creating order
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create an order
+      tags:
+      - Orders
+  /orders/{ID}:
+    delete:
+      description: Requires Administrator role. Only orders in the Created state can
+        be deleted.
+      parameters:
+      - description: Order ID
+        in: path
+        name: ID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid ID
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Error deleting order
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete an order
+      tags:
+      - Orders
+    get:
+      parameters:
+      - description: Order ID
+        in: path
+        name: ID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Order'
+        "400":
+          description: Invalid ID
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Order not found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get an order by its ID
+      tags:
+      - Orders
+    put:
+      consumes:
+      - application/json
+      description: Requires Preparator or Reception role.
+      parameters:
+      - description: Order ID
+        in: path
+        name: ID
+        required: true
+        type: integer
+      - description: New order state
+        in: body
+        name: update
+        required: true
+        schema:
+          $ref: '#/definitions/models.StateOrderUpdate'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/models.Order'
+        "400":
+          description: Invalid ID or state
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Order not found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update the state of an order
+      tags:
+      - Orders
   /products:
     get:
       produces:
@@ -67,7 +616,7 @@ paths:
             $ref: '#/definitions/models.ErrorResponse'
       summary: Get all products
       tags:
-      - products
+      - Products
     post:
       consumes:
       - application/json
@@ -98,7 +647,7 @@ paths:
       - BearerAuth: []
       summary: Create a product
       tags:
-      - products
+      - Products
   /products/{ID}:
     delete:
       parameters:
@@ -126,7 +675,7 @@ paths:
       - BearerAuth: []
       summary: Delete a product
       tags:
-      - products
+      - Products
     get:
       parameters:
       - description: Product ID
@@ -143,7 +692,7 @@ paths:
             $ref: '#/definitions/models.ReturnProduct'
       summary: Get a single product by its ID
       tags:
-      - products
+      - Products
     put:
       consumes:
       - application/json
@@ -188,7 +737,117 @@ paths:
       - BearerAuth: []
       summary: Update a product
       tags:
-      - products
+      - Products
+  /users/{username}/role:
+    put:
+      consumes:
+      - application/json
+      description: 'Sets the role of an existing user. Valid roles: administrator,
+        preparator, reception.'
+      parameters:
+      - description: Username
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: Role to assign
+        in: body
+        name: role
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserRoleUpdateForm'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UserReturn'
+        "400":
+          description: Invalid role
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Username not found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Assign a role to a user
+      tags:
+      - Users
+  /users/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user and returns a JWT valid for 8 hours. The token
+        must be sent as a Bearer token on protected endpoints.
+      parameters:
+      - description: Username and password
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserForm'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.TokenResponse'
+        "400":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: User has no role assigned
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Username not found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Error generating token
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Login
+      tags:
+      - Users
+  /users/register:
+    post:
+      consumes:
+      - application/json
+      description: Creates a user account. New users have no role and cannot log in
+        until one is assigned.
+      parameters:
+      - description: Username and password
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserForm'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.UserReturn'
+        "400":
+          description: Invalid payload
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Error creating user
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Register a new user
+      tags:
+      - Users
 securityDefinitions:
   BearerAuth:
     description: Use a bearer token to authenticate. Get a token at /users/login

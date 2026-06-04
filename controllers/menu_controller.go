@@ -27,6 +27,18 @@ func CreateMenu(db *gorm.DB, menu *models.Menu) error {
 }
 
 // CreateMenuHandler is the http handler that receives the Create Menu request
+//
+//	@summary		Create a menu
+//	@description	Requires Administrator role.
+//	@tags			Menus
+//	@accept			json
+//	@produce		json
+//	@security		BearerAuth
+//	@param			menu	body		models.Menu	true	"Menu payload"
+//	@success		201		{object}	models.MenuResponse
+//	@failure		400		{object}	models.ErrorResponse	"Invalid menu payload"
+//	@failure		500		{object}	models.ErrorResponse	"Error creating menu"
+//	@router			/menus [post]
 func CreateMenuHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var menu models.Menu
@@ -52,6 +64,13 @@ func GetMenus(db *gorm.DB) ([]models.Menu, error) {
 }
 
 // GetMenusHandler is the http handler that will receive the request and return all menus
+//
+//	@summary	Get all menus
+//	@tags		Menus
+//	@produce	json
+//	@success	200	{object}	[]models.MenuResponse
+//	@failure	500	{object}	models.ErrorResponse	"Error loading menus"
+//	@router		/menus [get]
 func GetMenusHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		menus, err := GetMenus(db)
@@ -72,7 +91,17 @@ func GetMenu(db *gorm.DB, id int) (*models.Menu, error) {
 	return &menu, nil
 }
 
-// GetMenusHandler is the http handler that receives
+// GetMenuHandler is the http handler that receives a request to get a single menu by its ID
+//
+//	@summary	Get a menu by its ID
+//	@tags		Menus
+//	@produce	json
+//	@param		ID	path		int	true	"Menu ID"
+//	@success	200	{object}	models.MenuResponse
+//	@failure	400	{object}	models.ErrorResponse	"Invalid ID"
+//	@failure	404	{object}	models.ErrorResponse	"Menu not found"
+//	@failure	500	{object}	models.ErrorResponse	"Internal error"
+//	@router		/menus/{ID} [get]
 func GetMenuHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		idParam := c.Param("id")
@@ -107,6 +136,18 @@ func DeleteMenu(db *gorm.DB, id int) error {
 }
 
 // DeleteMenuHandler is the http handler that receives DELETE requests for a given menu
+//
+//	@summary		Delete a menu
+//	@description	Requires Administrator role.
+//	@tags			Menus
+//	@produce		json
+//	@security		BearerAuth
+//	@param			ID	path	int	true	"Menu ID"
+//	@success		204
+//	@failure		400	{object}	models.ErrorResponse	"Invalid ID"
+//	@failure		404	{object}	models.ErrorResponse	"Menu not found"
+//	@failure		500	{object}	models.ErrorResponse	"Internal error"
+//	@router			/menus/{ID} [delete]
 func DeleteMenuHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		idParam := c.Param("id")
@@ -136,6 +177,21 @@ func UpdateMenu(db *gorm.DB, id int, update map[string]any) (*models.Menu, error
 	return &menu, nil
 }
 
+// UpdateMenuHandler is the http handler that receives PUT requests to update a menu
+//
+//	@summary		Update a menu
+//	@description	Requires Administrator role.
+//	@tags			Menus
+//	@accept			json
+//	@produce		json
+//	@security		BearerAuth
+//	@param			ID		path		int					true	"Menu ID"
+//	@param			update	body		models.UpdateMenu	true	"Fields to update"
+//	@success		200		{object}	models.MenuResponse
+//	@failure		400		{object}	models.ErrorResponse	"Invalid ID or payload"
+//	@failure		404		{object}	models.ErrorResponse	"Menu not found"
+//	@failure		500		{object}	models.ErrorResponse	"Error updating menu"
+//	@router			/menus/{ID} [put]
 func UpdateMenuHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var updateMenu models.UpdateMenu

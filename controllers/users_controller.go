@@ -45,6 +45,20 @@ func UpdateUserRole(db *gorm.DB, username string, role models.Role) (*models.Use
 	return user, db.Model(&user).Update("role", role).Error
 }
 
+// UpdateUserRoleHandler updates the role of a user by username
+//
+//	@summary		Assign a role to a user
+//	@description	Sets the role of an existing user. Valid roles: administrator, preparator, reception.
+//	@tags			Users
+//	@accept			json
+//	@produce		json
+//	@param			username	path		string						true	"Username"
+//	@param			role		body		models.UserRoleUpdateForm	true	"Role to assign"
+//	@success		200			{object}	models.UserReturn
+//	@failure		400			{object}	models.ErrorResponse	"Invalid role"
+//	@failure		404			{object}	models.ErrorResponse	"Username not found"
+//	@failure		500			{object}	models.ErrorResponse	"Internal error"
+//	@router			/users/{username}/role [put]
 func UpdateUserRoleHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		username := c.Param("username")
@@ -84,6 +98,17 @@ func GetUserByUsername(db *gorm.DB, username string) (*models.User, error) {
 }
 
 // Register allows users to sign up using username and password. They have no role by default.
+//
+//	@summary		Register a new user
+//	@description	Creates a user account. New users have no role and cannot log in until one is assigned.
+//	@tags			Users
+//	@accept			json
+//	@produce		json
+//	@param			user	body		models.UserForm	true	"Username and password"
+//	@success		201		{object}	models.UserReturn
+//	@failure		400		{object}	models.ErrorResponse	"Invalid payload"
+//	@failure		500		{object}	models.ErrorResponse	"Error creating user"
+//	@router			/users/register [post]
 func Register(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// User Form is username + password
@@ -116,7 +141,20 @@ func Register(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
-// Login will ensure the users are authenticated and return the a JWT to use.
+// Login will ensure the users are authenticated and return a JWT to use.
+//
+//	@summary		Login
+//	@description	Authenticates a user and returns a JWT valid for 8 hours. The token must be sent as a Bearer token on protected endpoints.
+//	@tags			Users
+//	@accept			json
+//	@produce		json
+//	@param			credentials	body		models.UserForm	true	"Username and password"
+//	@success		200			{object}	models.TokenResponse
+//	@failure		400			{object}	models.ErrorResponse	"Invalid credentials"
+//	@failure		403			{object}	models.ErrorResponse	"User has no role assigned"
+//	@failure		404			{object}	models.ErrorResponse	"Username not found"
+//	@failure		500			{object}	models.ErrorResponse	"Error generating token"
+//	@router			/users/login [post]
 func Login(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// User form is username + password

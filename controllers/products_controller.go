@@ -18,7 +18,7 @@ func CreateProduct(db *gorm.DB, product *models.Product) error {
 
 // http handler to receive create product
 //
-//	@tags			products
+//	@tags			Products
 //	@summary		Create a product
 //	@accept			json
 //	@produce		json
@@ -55,7 +55,7 @@ func GetProducts(db *gorm.DB) ([]models.Product, error) {
 
 // http handler to return the products to the caller
 //
-//	@tags		products
+//	@tags		Products
 //	@summary	Get all products
 //	@produce	json
 //	@success	200	{object}	[]models.ReturnProduct	"The list of products"
@@ -86,7 +86,7 @@ func GetProductByID(db *gorm.DB, id int) (*models.Product, error) {
 
 // http handler to get a product by its ID
 //
-//	@tags		products
+//	@tags		Products
 //	@summary	Get a single product by its ID
 //	@produce	json
 //	@param		ID	path		int						true	"Product ID"
@@ -131,7 +131,7 @@ func DeleteProduct(db *gorm.DB, id int) error {
 // Delete product http handler
 //
 //	@router		/products/{ID} [delete]
-//	@tags		products
+//	@tags		Products
 //	@summary	Delete a product
 //	@success	204
 //	@param		ID	path	int	true	"Product ID"
@@ -185,7 +185,7 @@ func UpdateProduct(db *gorm.DB, id int, update map[string]any) (*models.Product,
 //	@param			update	body	models.UpdateProducts	true	"fields to update"
 //	@router			/products/{ID} [put]
 //	@security		BearerAuth
-//	@tags			products
+//	@tags			Products
 //	@param			ID	path		int						true	"Product ID"
 //	@success		200	{object}	models.ReturnProduct	"The updated product"
 //	@produce		json

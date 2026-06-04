@@ -69,6 +69,18 @@ func CreateOrder(db *gorm.DB, inputOrder *models.OrderInput) (*models.Order, err
 	return &order, nil
 }
 
+// CreateOrderHandler is the http handler to create a product
+//
+//	@summary	Create an order
+//	@tags		Orders
+//	@accept		json
+//	@produce	json
+//	@security	BearerAuth
+//	@param		order	body		models.OrderInput	true	"Payload to create an order"
+//	@success	201		{object}	models.Order
+//	@failure	400		{object}	models.ErrorResponse	"Invalid order payload"
+//	@failure	500		{object}	models.ErrorResponse	"Error creating order"
+//	@router		/orders [post]
 func CreateOrderHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var inputOrder models.OrderInput
@@ -103,6 +115,17 @@ func DeleteOrder(db *gorm.DB, id int) error {
 }
 
 // DeleteOrderHandler will handle requests
+//
+//	@summary		Delete an order
+//	@description	Requires Administrator role. Only orders in the Created state can be deleted.
+//	@tags			Orders
+//	@produce		json
+//	@security		BearerAuth
+//	@param			ID	path	int	true	"Order ID"
+//	@success		204
+//	@failure		400	{object}	models.ErrorResponse	"Invalid ID"
+//	@failure		500	{object}	models.ErrorResponse	"Error deleting order"
+//	@router			/orders/{ID} [delete]
 func DeleteOrderHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		idParam := c.Param("id")
@@ -133,6 +156,17 @@ func GetOrders(db *gorm.DB, filters models.OrderFilter) ([]models.Order, error) 
 }
 
 // GetOrdersHandler handles http requests to get orders
+//
+//	@summary	Get all orders
+//	@tags		Orders
+//	@produce	json
+//	@security	BearerAuth
+//	@param		state	query		string	false	"Filter by state: Created, Validated, Ready, Delivered"
+//	@param		sort	query		string	false	"Sort by creation date: asc or desc"
+//	@success	200		{object}	[]models.Order
+//	@failure	400		{object}	models.ErrorResponse	"Invalid query parameters"
+//	@failure	500		{object}	models.ErrorResponse	"Error retrieving orders"
+//	@router		/orders [get]
 func GetOrdersHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Initite a filter for orders
@@ -172,6 +206,17 @@ func GetOrder(db *gorm.DB, id int) (*models.Order, error) {
 }
 
 // GetOrderHandler is the http handler that receives request to get a single order by its ID
+//
+//	@summary	Get an order by its ID
+//	@tags		Orders
+//	@produce	json
+//	@security	BearerAuth
+//	@param		ID	path		int	true	"Order ID"
+//	@success	200	{object}	models.Order
+//	@failure	400	{object}	models.ErrorResponse	"Invalid ID"
+//	@failure	404	{object}	models.ErrorResponse	"Order not found"
+//	@failure	500	{object}	models.ErrorResponse	"Internal error"
+//	@router		/orders/{ID} [get]
 func GetOrderHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		idPram := c.Param("id")
@@ -205,6 +250,20 @@ func UpdateOrderState(db *gorm.DB, id int, state models.OrderState) (models.Orde
 }
 
 // UpdateOrderStateHandler is the http handler that will receive http/put requests to update the status of an order.
+//
+//	@summary		Update the state of an order
+//	@description	Requires Preparator or Reception role.
+//	@tags			Orders
+//	@accept			json
+//	@produce		json
+//	@security		BearerAuth
+//	@param			ID		path		int						true	"Order ID"
+//	@param			update	body		models.StateOrderUpdate	true	"New order state"
+//	@success		202		{object}	models.Order
+//	@failure		400		{object}	models.ErrorResponse	"Invalid ID or state"
+//	@failure		404		{object}	models.ErrorResponse	"Order not found"
+//	@failure		500		{object}	models.ErrorResponse	"Internal error"
+//	@router			/orders/{ID} [put]
 func UpdateOrderStateHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		idParam := c.Param("id")
