@@ -4,6 +4,7 @@ go 1.26.3
 
 require (
 	github.com/esrid/watcher v0.1.8
+	github.com/gin-contrib/cors v1.7.7
 	github.com/gin-gonic/gin v1.12.0
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/google/uuid v1.6.0
@@ -12,7 +13,9 @@ require (
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.1
 	github.com/swaggo/swag v1.16.6
+	github.com/unrolled/secure v1.17.0
 	golang.org/x/crypto v0.52.0
+	golang.org/x/time v0.15.0
 	gorm.io/driver/mysql v1.6.0
 	gorm.io/gorm v1.31.1
 )

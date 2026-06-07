@@ -61,14 +61,19 @@ func main() {
 	router := gin.Default()
 	// Trust no proxy
 	router.SetTrustedProxies(nil)
+	// Add swagger and schema inspector. They do not receive the Cors / rate limit and security configuration.
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	routes.RegisterWatcher(db, router)
+
+	// Add security configurations: rate limit, CORS policy, basic security
+	router.Use(config.CORSMiddleware())
+	router.Use(config.SecurityMiddleware())
+	router.Use(config.RateLimit(100))
 	// Register the routes
 	routes.RegisterProductRoutes(db, router)
 	routes.RegisterUserRoutes(db, router)
 	routes.RegisterMenuRoutes(db, router)
-	routes.RegisterWatcher(db, router)
 	routes.RegisterOrderRoutes(db, router)
-	// Add swagger
-	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	// Start the web server
 	slog.Info("Server started, listening on port 8080")
 	if err := router.Run(":8080"); err != nil {
