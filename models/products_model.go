@@ -21,7 +21,7 @@ type Product struct {
 	DeletedAt gorm.DeletedAt
 	Name      string   `gorm:"size:64;not null" json:"name" binding:"required"`
 	UnitPrice float64  `gorm:"type:decimal(10,2);not null" json:"unit_price" binding:"required"`
-	Type      Category `gorm:"type:enum('Boisson','Burger','Accompagnement');not null" json:"type" binding:"required"`
+	Type      Category `gorm:"type:enum('Boisson','Burger','Accompagnement');not null" json:"type" binding:"required,oneof=Boisson Burger Accompagnement"`
 	Available bool     `gorm:"not null;type:bool" json:"available" binding:"required"`
 }
 

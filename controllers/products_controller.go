@@ -33,11 +33,14 @@ func CreateProductHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var product models.Product
 		if err := c.BindJSON(&product); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid product"})
+			// Testing validator errors
+			// Error when providing an incorrect enum validated by the oneof tag
+			// {"error":"unable to create product: Key: 'Product.Type' Error:Field validation for 'Type' failed on the 'oneof' tag"}
+			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("unable to create product: %s", err.Error())})
 			return
 		}
 		if err := CreateProduct(db, &product); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "unable to create product"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("unable to create product: %s", err.Error())})
 			return
 		}
 		c.JSON(http.StatusCreated, product)
