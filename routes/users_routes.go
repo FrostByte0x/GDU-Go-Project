@@ -11,7 +11,9 @@ import (
 
 func RegisterUserRoutes(db *gorm.DB, router *gin.Engine) {
 	UserRoutes := router.Group("/users")
-	UserRoutes.Use(middlewares.LocalHostOnly())
+	// Not really useful anymore since we have authenticated the admin routes, and also not practical.
+	// left for documentation purposes
+	// UserRoutes.Use(middlewares.LocalHostOnly())
 
 	{
 		UserRoutes.POST("/register", controllers.Register(db))

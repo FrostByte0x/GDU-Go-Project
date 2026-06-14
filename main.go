@@ -1,10 +1,12 @@
 package main
 
 import (
+	"errors"
 	"log"
 	"log/slog"
 	"os"
 	"wacdo-backend/config"
+	"wacdo-backend/controllers"
 	"wacdo-backend/models"
 	"wacdo-backend/routes"
 
@@ -14,6 +16,8 @@ import (
 	"github.com/joho/godotenv"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 //	@title			Wacdo Order System Backend
@@ -34,7 +38,8 @@ func main() {
 	// load .env variables using go dot env
 	err := godotenv.Load(".env")
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		// We use .env in dev, but variables are injected through the run time in production.
+		slog.Info("Error loading .env file, if you are running this as a container, this is expected")
 	}
 	// InitDB handles errors itself, not in main.
 	db := config.InitDB()
@@ -51,12 +56,39 @@ func main() {
 		models.Product{},
 		models.OrderProduct{},
 	)
-
 	if err != nil {
 		slog.Error(err.Error())
 		os.Exit(1)
 	}
 	slog.Info("Database setup is complete.")
+	// Bootstrap admin user
+	//
+	const adminuser string = "admin2"
+	if _, err := controllers.GetUserByUsername(db, adminuser); err != nil {
+		slog.Info("Admin1 not found, processing bootstrap")
+		// only if not found
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			password, err := bcrypt.GenerateFromPassword([]byte(adminuser), bcrypt.DefaultCost)
+			if err != nil {
+				log.Fatalf("error generating bootstrap user password: %s", err.Error())
+			}
+			err = controllers.CreateUser(db, &models.User{
+				Username: adminuser,
+				Password: string(password),
+			})
+			if err != nil {
+				log.Fatalf("error creating bootstrap user password: %s", err.Error())
+			}
+			_, err = controllers.UpdateUserRole(db, adminuser, models.Administrator)
+			if err != nil {
+				log.Fatalf("error updating bootstrap user role: %s", err.Error())
+			}
+		} else {
+			log.Fatalf("unable to check existing admin user: %s", err.Error())
+		}
+	} else {
+		slog.Info("Bootstrap skipped because admin user already exists")
+	}
 	// Register gin components
 	router := gin.Default()
 	// Trust no proxy

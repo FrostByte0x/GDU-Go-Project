@@ -26,3 +26,12 @@ services:
     volumes:
       - ./.data_test/mysql:/var/lib/mysql
       - ./init:/docker-entrypoint-initdb.d
+
+  wacdo-backend:
+    build: .
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env.docker
+    depends_on:
+      - mariadb
