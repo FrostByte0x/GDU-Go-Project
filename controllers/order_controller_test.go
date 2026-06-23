@@ -156,7 +156,7 @@ func TestCreateOrder(t *testing.T) {
 		product := createTestProduct(t)
 		input := models.OrderInput{
 			Products: []models.OrderProduct{
-				{ProductID: uint(product.ID), Quantity: 1},
+				{ProductID: uint(product.ID), Quantity: 2},
 			},
 			Menus: []models.OrderMenu{},
 		}
@@ -170,7 +170,7 @@ func TestCreateOrder(t *testing.T) {
 		refetched, err := controllers.GetOrder(testDB, int(order.ID))
 		td.CmpNoError(t, err)
 		td.Cmp(t, refetched.Price, originalPrice)
-		td.Cmp(t, refetched.Products[0].UnitPrice, originalPrice)
+		td.Cmp(t, refetched.Products[0].UnitPrice, product.UnitPrice)
 	})
 
 	t.Run("empty order is rejected", func(t *testing.T) {

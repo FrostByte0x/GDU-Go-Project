@@ -11,7 +11,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -31,7 +30,12 @@ func CreateUserHandler(db *gorm.DB) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(http.StatusCreated, user)
+		c.JSON(http.StatusCreated, models.UserReturn{
+			ID:        user.ID,
+			Username:  user.Username,
+			CreatedAt: user.CreatedAt,
+			UpdatedAt: user.UpdatedAt,
+		})
 	}
 }
 
@@ -118,9 +122,13 @@ func Register(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 		// Check that the user does not exist
-		user, err := GetUserByUsername(db, SignUp.Username)
-		if user.ID != uuid.Nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "error creating user"})
+		_, err := GetUserByUsername(db, SignUp.Username)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				c.JSON(http.StatusConflict, gin.H{"error": "user already exists"})
+				return
+			}
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 			return
 		}
 		// Create the user model
@@ -137,7 +145,12 @@ func Register(db *gorm.DB) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "error creating user"})
 			return
 		}
-		c.JSON(http.StatusCreated, User)
+		c.JSON(http.StatusCreated, models.UserReturn{
+			ID:        User.ID,
+			Username:  User.Username,
+			CreatedAt: User.CreatedAt,
+			UpdatedAt: User.UpdatedAt,
+		})
 	}
 }
 

@@ -246,7 +246,7 @@ func ToMenuResponse(menu models.Menu) models.MenuResponse {
 	return models.MenuResponse{
 		ID:       menu.ID,
 		Name:     menu.Name,
-		Price:    uint(menu.Price),
+		Price:    menu.Price,
 		Products: products,
 	}
 }

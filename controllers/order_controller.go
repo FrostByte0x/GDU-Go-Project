@@ -24,7 +24,7 @@ import (
 func CreateOrder(db *gorm.DB, inputOrder *models.OrderInput) (*models.Order, error) {
 	// Ensure the order is not empty, we don't take empty orders
 	if len(inputOrder.Menus) < 1 && len(inputOrder.Products) < 1 {
-		return nil, fmt.Errorf("At least one Menu or Product must be present in the order.")
+		return nil, errors.New("order must contain at least one menu or one product")
 	}
 	// Create the complete Order
 	var order models.Order
@@ -40,7 +40,7 @@ func CreateOrder(db *gorm.DB, inputOrder *models.OrderInput) (*models.Order, err
 		}
 		// Ensure product is available when added to the order
 		if !product.Available {
-			return nil, fmt.Errorf("Product %s is currently unavailable.", product.Name)
+			return nil, fmt.Errorf("product %s is currently unavailable", product.Name)
 		}
 		order.Products[k].Name = product.Name
 		order.Products[k].UnitPrice = product.UnitPrice
@@ -54,7 +54,7 @@ func CreateOrder(db *gorm.DB, inputOrder *models.OrderInput) (*models.Order, err
 		}
 		// Ensure menu is available when added to the order
 		if !menu.Available {
-			return nil, fmt.Errorf("Menu %s is currently unavailable.", menu.Name)
+			return nil, fmt.Errorf("menu %s is currently unavailable", menu.Name)
 		}
 		order.Menus[k].Name = menu.Name
 		order.Menus[k].UnitPrice = menu.Price
@@ -201,8 +201,10 @@ func GetOrdersHandler(db *gorm.DB) gin.HandlerFunc {
 // GetOrder will return a single order by its ID
 func GetOrder(db *gorm.DB, id int) (*models.Order, error) {
 	var order models.Order
-	err := db.Preload("Products").Preload("Menus").First(&order, id).Error
-	return &order, err
+	if err := db.Preload("Products").Preload("Menus").First(&order, id).Error; err != nil {
+		return nil, err
+	}
+	return &order, nil
 }
 
 // GetOrderHandler is the http handler that receives request to get a single order by its ID

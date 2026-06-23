@@ -123,12 +123,11 @@ func GetProductHandler(db *gorm.DB) gin.HandlerFunc {
 
 // Delete Products
 func DeleteProduct(db *gorm.DB, id int) error {
-	var product *models.Product
 	product, err := GetProductByID(db, id)
 	if err != nil {
 		return err
 	}
-	return db.Delete(&product).Error
+	return db.Delete(product).Error
 }
 
 // Delete product http handler
@@ -153,7 +152,7 @@ func DeleteProductHandler(db *gorm.DB) gin.HandlerFunc {
 		err = DeleteProduct(db, id)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				c.JSON(http.StatusNotFound, gin.H{"error": fmt.Sprintf("product with ID %d not found.", id)})
+				c.JSON(http.StatusNotFound, gin.H{"error": fmt.Sprintf("product with ID %d not found", id)})
 				return
 			} else {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Error deleting product"})
