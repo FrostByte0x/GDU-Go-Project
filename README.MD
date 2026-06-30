@@ -227,15 +227,18 @@ sequenceDiagram
     API-->>U: 200 + JWT (HS256, expire 8h)
 
     Note over U,API: Requete sur une route protegee
-    U->>API: GET /orders (Authorization: Bearer JWT)
+    U->>API: Requete + Authorization: Bearer JWT<br/>(GET / POST / PUT / DELETE)
     API->>API: Authenticate (signature + expiration)
     API->>API: Authorize (role autorise ?)
-    alt Token valide et role autorise
-        API-->>U: 200 + donnees
+    alt Token valide ET role autorise
+        Note over API,DB: Pas de cache : la base est toujours interrogee
+        API->>DB: GET -> SELECT<br/>POST -> INSERT<br/>PUT -> UPDATE<br/>DELETE -> DELETE (soft delete)
+        DB-->>API: Resultat / lignes affectees
+        API-->>U: 200 / 201 / 202 / 204 + donnees
     else Token absent / invalide
         API-->>U: 401 Unauthorized
     else Role insuffisant
         API-->>U: 403 / 401 Forbidden
     end
-
+    
 ```
