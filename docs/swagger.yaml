@@ -84,7 +84,7 @@ definitions:
           $ref: '#/definitions/models.MenuProductResponse'
         type: array
       unit_price:
-        type: integer
+        type: number
     type: object
   models.Order:
     properties:
@@ -276,6 +276,8 @@ definitions:
     properties:
       role:
         $ref: '#/definitions/models.Role'
+    required:
+    - role
     type: object
 host: localhost:8080
 info:

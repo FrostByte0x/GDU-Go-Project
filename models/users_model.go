@@ -36,7 +36,7 @@ type UserForm struct {
 	Password string `json:"password"`
 }
 type UserRoleUpdateForm struct {
-	Role *Role `json:"role"`
+	Role *Role `json:"role" binding:"required"`
 }
 
 // Work in progress - struct to return to administrator when changing a user

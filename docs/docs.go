@@ -1010,7 +1010,7 @@ const docTemplate = `{
                     }
                 },
                 "unit_price": {
-                    "type": "integer"
+                    "type": "number"
                 }
             }
         },
@@ -1284,6 +1284,9 @@ const docTemplate = `{
         },
         "models.UserRoleUpdateForm": {
             "type": "object",
+            "required": [
+                "role"
+            ],
             "properties": {
                 "role": {
                     "$ref": "#/definitions/models.Role"

@@ -62,10 +62,9 @@ func main() {
 	}
 	slog.Info("Database setup is complete.")
 	// Bootstrap admin user
-	//
 	const adminuser string = "admin2"
 	if _, err := controllers.GetUserByUsername(db, adminuser); err != nil {
-		slog.Info("Admin1 not found, processing bootstrap")
+		slog.Info("Admin2 not found, processing bootstrap")
 		// only if not found
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			password, err := bcrypt.GenerateFromPassword([]byte(adminuser), bcrypt.DefaultCost)

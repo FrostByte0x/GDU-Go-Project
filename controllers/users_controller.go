@@ -123,11 +123,8 @@ func Register(db *gorm.DB) gin.HandlerFunc {
 		}
 		// Check that the user does not exist
 		_, err := GetUserByUsername(db, SignUp.Username)
-		if err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				c.JSON(http.StatusConflict, gin.H{"error": "user already exists"})
-				return
-			}
+		// Ensure the error is not RecordNotFound, since we don't expect to find users who try to register.
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 			return
 		}
