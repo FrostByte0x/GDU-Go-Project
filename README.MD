@@ -135,3 +135,107 @@ Trois rôles distincts sont à implémenter :
 * La gestion d'utilisateurs est "sécurisée" en autorisant l'accès uniquement depuis localhost à défaut de pouvoir implémenter un système d'IAM complet. 
 * Gorm ne supporte pas la création de Menus ou Products qui sont Available (bool)=false,car les modèles en structs ne prennent pas les champs nuls, 0 ou false par défaut. On considère pour l'instant que la création ne peut se faire que en true, et qu'une update est possible (par le client) en false ensuite, car update utilise une ```map[string]any```. Une implémentation front-end pourrait le gérer (pas idéal) ou le handler http lui-même avec un pointer, qui complexifie le code. 
 * Images non implémentées.
+
+# Schéma fonctionnels
+
+## Cas d'usage
+```mermaid
+flowchart LR
+    Borne(["Borne / Front public<br/>non authentifie"])
+    Accueil(["Accueil"])
+    Prepa(["Preparation"])
+    Admin(["Administration"])
+
+    subgraph Consultation["Consultation publique"]
+        P1["Consulter les produits<br/>GET /products"]
+        P2["Consulter les menus<br/>GET /menus"]
+    end
+    subgraph Commandes["Gestion des commandes"]
+        C1["Creer une commande<br/>POST /orders"]
+        C2["Lister / voir les commandes<br/>GET /orders"]
+        C3["Faire evoluer l'etat<br/>PUT /orders/:id"]
+        C4["Supprimer une commande<br/>DELETE /orders/:id"]
+    end
+    subgraph Catalogue["Catalogue - Admin"]
+        K1["CRUD produits"]
+        K2["CRUD menus"]
+    end
+    subgraph Users["Comptes"]
+        U1["S'inscrire / se connecter"]
+        U2["Assigner un role<br/>PUT /users/:username/role"]
+    end
+
+    Borne --> P1
+    Borne --> P2
+
+    Accueil --> C1
+    Accueil --> C2
+    Accueil --> C3
+
+    Prepa --> C2
+    Prepa --> C3
+
+    Admin --> C4
+    Admin --> K1
+    Admin --> K2
+    Admin --> U2
+
+    U1 -.-> Accueil
+    U1 -.-> Prepa
+    U1 -.-> Admin
+```
+
+## Cycle de vie des commandes
+```mermaid
+stateDiagram-v2
+    [*] --> Created: Accueil cree la commande (POST /orders)
+    Created --> Validated: Accueil confirme le paiement
+    Validated --> Ready: Preparation marque preparee
+    Ready --> Delivered: Accueil remet au client
+    Delivered --> [*]
+    Created --> [*]: Admin supprime (etat Created uniquement)
+```
+
+## Parcours de commande
+```mermaid
+flowchart TD
+    A["Client choisit produits / menus<br/>sur la borne"] --> B["Accueil saisit la commande<br/>POST /orders"]
+    B --> C{"Produits / menus<br/>disponibles ?"}
+    C -- Non --> C1["Rejet : article indisponible"]
+    C1 --> A
+    C -- Oui --> D["Commande creee - etat = Created<br/>prix calcule cote serveur"]
+    D --> E{"Paiement<br/>confirme ?"}
+    E -- Non --> E1["Reste Created<br/>supprimable par Admin"]
+    E -- Oui --> F["Accueil : etat -> Validated"]
+    F --> G["Preparation prepare<br/>etat -> Ready"]
+    G --> H["Accueil remet au client<br/>etat -> Delivered"]
+    H --> I(["Commande terminee"])
+
+```
+
+## Authentification
+```mermaid
+sequenceDiagram
+    participant U as Utilisateur (staff)
+    participant API as API Wacdo
+    participant DB as MariaDB
+
+    U->>API: POST /users/login (username, password)
+    API->>DB: SELECT user WHERE username
+    DB-->>API: user + hash bcrypt
+    API->>API: bcrypt.Compare + verifie role != nil
+    API-->>U: 200 + JWT (HS256, expire 8h)
+
+    Note over U,API: Requete sur une route protegee
+    U->>API: GET /orders (Authorization: Bearer JWT)
+    API->>API: Authenticate (signature + expiration)
+    API->>API: Authorize (role autorise ?)
+    alt Token valide et role autorise
+        API-->>U: 200 + donnees
+    else Token absent / invalide
+        API-->>U: 401 Unauthorized
+    else Role insuffisant
+        API-->>U: 403 / 401 Forbidden
+    end
+
+```
