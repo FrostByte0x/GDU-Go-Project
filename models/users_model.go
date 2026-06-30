@@ -27,7 +27,7 @@ type User struct {
 	CreatedAt time.Time
 	DeletedAt gorm.DeletedAt
 	UpdatedAt time.Time
-	Username  string `gorm:"size:32" json:"username"`
+	Username  string `gorm:"size:32;uniqueIndex" json:"username"`
 	Password  string `gorm:"size:255" json:"password"`
 	Role      *Role  `gorm:"type:enum('administrator','preparator','reception')" json:"role"` // nullable by using a pointer
 }
